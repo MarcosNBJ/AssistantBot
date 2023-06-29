@@ -1,0 +1,32 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "airbnb-base",
+      "airbnb-typescript/base"
+    ],
+    "plugins": ["@typescript-eslint"],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "settings": {
+      "import/extensions": [".js", ".ts"],
+      "import/resolver": {
+        "alias": {
+          "map": [["@", "./src/"]],
+          "extensions": [".ts", ".js"]
+        }
+      }
+    },
+    "rules": {
+      "linebreak-style": "off",
+      "react/jsx-uses-react": "off",
+      "react/react-in-jsx-scope": "off",
+      "import/prefer-default-export": "off",
+      "import/no-cycle": "off",
+      "class-methods-use-this": "off",
+      "no-restricted-syntax": "off",
+      "no-continue": "off"
+    }
+  }
