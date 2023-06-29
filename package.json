@@ -1,0 +1,13 @@
+{
+  "name": "ManagerBot",
+  "version": "0.1.0",
+  "description": "Discord Bot to aid in freelance work management",
+  "main": "index.js",
+  "repository": "https://www.github.com/marcosnbj/managerbot",
+  "author": "MarcosN <marcosnery.comp@gmail.com>",
+  "license": "MIT",
+  "type": "module",	
+  "dependencies": {
+    "discord.js": "^14.11.0"
+  }
+}
