@@ -2,12 +2,19 @@
   "name": "ManagerBot",
   "version": "0.1.0",
   "description": "Discord Bot to aid in freelance work management",
-  "main": "index.js",
+  "main": "src/Bot.js",
   "repository": "https://www.github.com/marcosnbj/managerbot",
   "author": "MarcosN <marcosnery.comp@gmail.com>",
   "license": "MIT",
-  "type": "module",	
+  "scripts": {
+    "start": "ts-node src/Bot.ts"
+  },
   "dependencies": {
     "discord.js": "^14.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
   }
 }

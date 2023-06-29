@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, Events } from 'discord.js';
-import config from './config.js';
+import config from './config';
 
 const client = new Client({
 	intents: [
@@ -15,12 +15,12 @@ client.once(Events.ClientReady, c => {
 });
 
 client.on('interactionCreate', async interaction => {
-    console.log(interaction);
-    if (interaction.commandName === 'ping') {
-      await interaction.reply('Pong!');
-    }
-  });
-  
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'ping') {
+    await interaction.reply('Pong!');
+  }
+});
 // client.on('messageCreate', async message => {
 //     console.log(message);
 // });
