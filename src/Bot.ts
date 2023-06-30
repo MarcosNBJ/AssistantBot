@@ -1,4 +1,7 @@
-import { Client, GatewayIntentBits, Events } from 'discord.js';
+import {
+  Client, GatewayIntentBits, Events,
+} from 'discord.js';
+import mongoose from 'mongoose';
 import config from './config';
 import { Commands } from './commands';
 
@@ -14,6 +17,9 @@ const client = new Client({
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
   client?.application?.commands.set(Commands);
+  mongoose.connect(config.DATABASE_URL).then(
+    () => console.log('Connected to database'),
+  ).catch((erros) => console.log(`Database connection failed - ${erros}`));
 });
 
 client.on('interactionCreate', async (interaction) => {
