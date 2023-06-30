@@ -2,6 +2,7 @@ import {
   CommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
 } from 'discord.js';
 import { ICommand } from './types/ICommand';
+import RecordReminderService from '../services/RecordReminderService';
 
 export const RecordReminder: ICommand = {
   name: 'recordreminder',
@@ -62,6 +63,13 @@ export const RecordReminder: ICommand = {
     reminderParams.dateToRemind = dateToRemind;
 
     reminderParams.channelId = origin.channel.id;
+
+    await RecordReminderService.execute(
+      reminderParams.content,
+      reminderParams.channelId,
+      reminderParams.dateToRemind,
+    );
+
     await origin.reply(JSON.stringify(reminderParams));
   },
 };
