@@ -28,8 +28,23 @@ client.on('interactionCreate', async (interaction) => {
 
   slashCommand.run(interaction);
 });
-// client.on('messageCreate', async message => {
-//     console.log(message);
-// });
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith(config.prefix)) return;
+
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const command = args.shift()?.toLowerCase();
+
+  if (!command) return;
+
+  const slashCommand = Commands.find((c) => c.name === command);
+  if (!slashCommand) {
+    message.reply('An error has occurred');
+    return;
+  }
+
+  slashCommand.run(message);
+});
 
 client.login(config.token);
