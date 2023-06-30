@@ -31,9 +31,9 @@ client.on('interactionCreate', async (interaction) => {
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
-  if (!message.content.startsWith(config.prefix)) return;
+  if (!message.content.startsWith(config.COMMAND_PREFIX)) return;
 
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const args = message.content.slice(config.COMMAND_PREFIX.length).trim().split(/ +/g);
   const command = args.shift()?.toLowerCase();
 
   if (!command) return;
@@ -47,4 +47,4 @@ client.on('messageCreate', async (message) => {
   slashCommand.run(message);
 });
 
-client.login(config.token);
+client.login(config.TOKEN);
