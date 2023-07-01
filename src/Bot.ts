@@ -1,17 +1,12 @@
 import {
-  Client, GatewayIntentBits, Events,
+  Client, Events,
 } from 'discord.js';
 import mongoose from 'mongoose';
 import config from './config';
 import { Commands } from './commands';
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-  ],
+  intents: config.BOT_INTENTS,
 });
 
 client.once(Events.ClientReady, (c) => {
