@@ -1,11 +1,9 @@
 import { Job } from 'bullmq';
 import SendSingleMessage from '../services/SendSingleMessage';
 
-const SampleJob = (job: Job) => {
-  console.log('SampleJob');
-  console.log(job.data);
+const SendMessageJob = (job: Job) => {
   SendSingleMessage(job.data.content, job.data.channelId);
   return Promise.resolve();
 };
 
-export default SampleJob;
+export default SendMessageJob;

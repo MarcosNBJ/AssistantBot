@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
-import SampleJob from './jobs/SampleJob';
+import SendMessageJob from './jobs/SendMessageJob';
 
-const worker = new Worker('jobQueue', SampleJob, {
+const worker = new Worker('jobQueue', SendMessageJob, {
   connection: {
     host: '127.0.0.1',
     port: 6379,
