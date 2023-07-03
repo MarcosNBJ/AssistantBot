@@ -2,11 +2,20 @@ import {
   Client, Events,
 } from 'discord.js';
 import mongoose from 'mongoose';
+import { Queue } from 'bullmq';
 import config from './config';
 import { Commands } from './commands';
 
 const client = new Client({
   intents: config.BOT_INTENTS,
+});
+
+const jobQueue = new Queue('jobQueue', {
+  connection: {
+    host: '127.0.0.1',
+    port: 6379,
+    password: 'foobarbaz',
+  },
 });
 
 client.once(Events.ClientReady, (c) => {
@@ -27,7 +36,7 @@ client.on('interactionCreate', async (interaction) => {
 
   await interaction.deferReply();
 
-  slashCommand.run(interaction);
+  slashCommand.run(jobQueue, interaction);
 });
 
 client.on('messageCreate', async (message) => {
@@ -45,7 +54,7 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  slashCommand.run(message);
+  slashCommand.run(jobQueue, message);
 });
 
 client.login(config.TOKEN);

@@ -1,5 +1,6 @@
+import { Queue } from 'bullmq';
 import { CommandInteraction, ChatInputApplicationCommandData, Message } from 'discord.js';
 
 export interface ICommand extends ChatInputApplicationCommandData {
-  run: (origin: CommandInteraction | Message) => void;
+  run: (jobQueue: Queue<any, any, string>, origin: CommandInteraction | Message) => void;
 }

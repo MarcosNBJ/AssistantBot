@@ -1,8 +1,9 @@
 import {
   CommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
 } from 'discord.js';
+import { Queue } from 'bullmq';
 import { ICommand } from './types/ICommand';
-import RecordReminderService from '../services/RecordReminderService';
+import ScheduleReminderService from '../services/ScheduleReminderService';
 
 export const RecordReminder: ICommand = {
   name: 'recordreminder',
@@ -22,7 +23,7 @@ export const RecordReminder: ICommand = {
       required: true,
     },
   ],
-  run: async (origin: CommandInteraction | Message) => {
+  run: async (jobQueue: Queue<any, any, string>, origin: CommandInteraction | Message) => {
     let reminderParams: {
       content: string,
       dateToRemind: string,
@@ -64,12 +65,12 @@ export const RecordReminder: ICommand = {
 
     reminderParams.channelId = origin.channel.id;
 
-    await RecordReminderService.execute(
+    ScheduleReminderService.execute(
+      jobQueue,
       reminderParams.content,
       reminderParams.channelId,
       reminderParams.dateToRemind,
     );
-
     await origin.reply(JSON.stringify(reminderParams));
   },
 };
