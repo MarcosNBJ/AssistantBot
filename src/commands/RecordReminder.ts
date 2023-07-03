@@ -1,29 +1,39 @@
 import {
   CommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
 } from 'discord.js';
-import Container from 'typedi';
-import { ICommand } from './types/ICommand';
-import ScheduleReminderService from '../services/ScheduleReminderService';
+import { Service } from 'typedi';
+import { BaseCommand } from './BaseCommand';
 
-export const RecordReminder: ICommand = {
-  name: 'recordreminder',
-  description: 'Records a reminder',
-  type: ApplicationCommandType.ChatInput,
-  options: [
-    {
-      name: 'content',
-      description: 'The content of the reminder',
-      type: ApplicationCommandOptionType.String,
-      required: true,
-    },
-    {
-      name: 'date',
-      description: 'The date to remind',
-      type: ApplicationCommandOptionType.String,
-      required: true,
-    },
-  ],
-  run: async (origin: CommandInteraction | Message) => {
+@Service()
+export class RecordReminder extends BaseCommand {
+  constructor() {
+    super(
+      {
+        name: 'recordreminder',
+
+        description: 'Records a reminder',
+
+        type: ApplicationCommandType.ChatInput,
+
+        options: [
+          {
+            name: 'content',
+            description: 'The content of the reminder',
+            type: ApplicationCommandOptionType.String,
+            required: true,
+          },
+          {
+            name: 'date',
+            description: 'The date to remind',
+            type: ApplicationCommandOptionType.String,
+            required: true,
+          },
+        ],
+      },
+    );
+  }
+
+  async run(origin: CommandInteraction | Message) {
     let reminderParams: {
       content: string,
       dateToRemind: string,
@@ -65,13 +75,11 @@ export const RecordReminder: ICommand = {
 
     reminderParams.channelId = origin.channel.id;
 
-    const scheduleReminderService = Container.get(ScheduleReminderService);
-
-    scheduleReminderService.execute(
+    this.scheduleReminderService.execute(
       reminderParams.content,
       reminderParams.channelId,
       reminderParams.dateToRemind,
     );
     await origin.reply(JSON.stringify(reminderParams));
-  },
-};
+  }
+}
