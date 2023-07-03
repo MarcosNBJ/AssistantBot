@@ -1,19 +1,13 @@
+import 'reflect-metadata';
 import {
   Client, Events,
 } from 'discord.js';
 import mongoose from 'mongoose';
-import { Queue } from 'bullmq';
 import config from './config';
 import { Commands } from './commands';
 
 const client = new Client({
   intents: config.BOT_INTENTS,
-});
-
-const jobQueue = new Queue('jobQueue', {
-  connection: {
-    ...config.REDIS,
-  },
 });
 
 client.once(Events.ClientReady, (c) => {
@@ -34,7 +28,7 @@ client.on('interactionCreate', async (interaction) => {
 
   await interaction.deferReply();
 
-  slashCommand.run(jobQueue, interaction);
+  slashCommand.run(interaction);
 });
 
 client.on('messageCreate', async (message) => {
@@ -52,7 +46,7 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  slashCommand.run(jobQueue, message);
+  slashCommand.run(message);
 });
 
 client.login(config.TOKEN);

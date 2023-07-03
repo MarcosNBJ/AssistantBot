@@ -1,8 +1,12 @@
-import { Queue } from 'bullmq';
+import { Inject, Service } from 'typedi';
+import { JobQueueService } from '../JobQueueService';
 
-class ScheduleReminderService {
+@Service()
+export default class ScheduleReminderService {
+  @Inject()
+  private jobqueue!: JobQueueService;
+
   async execute(
-    jobQueue: Queue<any, any, string>,
     content: string,
     channelId: string,
     dateToRemind: string,
@@ -10,11 +14,9 @@ class ScheduleReminderService {
     const targetTime = new Date(dateToRemind);
     const delay = Number(targetTime) - Number(new Date());
     const id = Math.random().toString(36).substring(7);
-    await jobQueue.add(`reminder-${id}`, {
+    await this.jobqueue.queue.add(`reminder-${id}`, {
       content,
       channelId,
     }, { delay });
   }
 }
-
-export default new ScheduleReminderService();
