@@ -12,9 +12,7 @@ const client = new Client({
 
 const jobQueue = new Queue('jobQueue', {
   connection: {
-    host: '127.0.0.1',
-    port: 6379,
-    password: 'foobarbaz',
+    ...config.REDIS,
   },
 });
 
