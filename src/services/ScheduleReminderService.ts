@@ -10,8 +10,9 @@ export default class ScheduleReminderService {
     content: string,
     channelId: string,
     dateToRemind: string,
+    timeToRemind: string,
   ) {
-    const targetTime = new Date(dateToRemind);
+    const targetTime = new Date(`${dateToRemind} ${timeToRemind}`);
     const delay = Number(targetTime) - Number(new Date());
     const id = Math.random().toString(36).substring(7);
     await this.jobqueue.queue.add(`reminder-${id}`, {

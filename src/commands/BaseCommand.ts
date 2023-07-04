@@ -4,9 +4,8 @@ import {
   CommandInteraction,
   Message,
 } from 'discord.js';
-import { Inject, Service } from 'typedi';
+import { Service } from 'typedi';
 import { ICommand } from './types/ICommand';
-import ScheduleReminderService from '../services/ScheduleReminderService';
 
 interface CommandData {
   name: string;
@@ -17,8 +16,6 @@ interface CommandData {
 
 @Service()
 export abstract class BaseCommand implements ICommand {
-  @Inject() protected scheduleReminderService!: ScheduleReminderService;
-
   public name: string;
 
   public type: ApplicationCommandType.ChatInput;

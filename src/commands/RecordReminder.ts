@@ -1,11 +1,14 @@
 import {
   CommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
 } from 'discord.js';
-import { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
 import { BaseCommand } from './BaseCommand';
+import ScheduleReminderService from '../services/ScheduleReminderService';
 
 @Service()
 export class RecordReminder extends BaseCommand {
+  @Inject() protected scheduleReminderService!: ScheduleReminderService;
+
   constructor() {
     super(
       {
@@ -21,10 +24,17 @@ export class RecordReminder extends BaseCommand {
             description: 'The content of the reminder',
             type: ApplicationCommandOptionType.String,
             required: true,
+
           },
           {
             name: 'date',
-            description: 'The date to remind',
+            description: 'The date to remind, in format DD/MM/YYYY',
+            type: ApplicationCommandOptionType.String,
+            required: true,
+          },
+          {
+            name: 'time',
+            description: 'The time of day to remind, in format HH:MM, 24h',
             type: ApplicationCommandOptionType.String,
             required: true,
           },
@@ -38,21 +48,33 @@ export class RecordReminder extends BaseCommand {
       content: string,
       dateToRemind: string,
       channelId: string,
+      timeToRemind: string,
     } = {
       content: '',
       dateToRemind: '',
       channelId: '',
+      timeToRemind: '',
     };
     if (origin instanceof CommandInteraction) {
       const content = origin.options.get('content')?.value as string;
       const dateToRemind = origin.options.get('date')?.value as string;
+      const timeToRemind = origin.options.get('time')?.value as string;
       const { channelId } = origin;
       reminderParams = {
         content,
         dateToRemind,
         channelId,
+        timeToRemind,
       };
-      await origin.followUp(JSON.stringify(reminderParams));
+      this.scheduleReminderService.execute(
+        reminderParams.content,
+        reminderParams.channelId,
+        reminderParams.dateToRemind,
+        reminderParams.timeToRemind,
+      );
+      await origin.followUp(`
+      Reminder recorded! I will remind you on ${reminderParams.dateToRemind} at ${reminderParams.timeToRemind}
+    `);
       return;
     }
 
@@ -69,9 +91,13 @@ export class RecordReminder extends BaseCommand {
     if (!content) return;
     reminderParams.content = content;
 
-    const dateToRemind = await askQuestion(origin, 'What is the date to remind?');
+    const dateToRemind = await askQuestion(origin, 'What is the date to remind?, in format DD/MM/YYYY');
     if (!dateToRemind) return;
     reminderParams.dateToRemind = dateToRemind;
+
+    const timeToRemind = await askQuestion(origin, 'What is the time to remind?, in format HH:MM, 24h');
+    if (!timeToRemind) return;
+    reminderParams.timeToRemind = timeToRemind;
 
     reminderParams.channelId = origin.channel.id;
 
@@ -79,7 +105,10 @@ export class RecordReminder extends BaseCommand {
       reminderParams.content,
       reminderParams.channelId,
       reminderParams.dateToRemind,
+      reminderParams.timeToRemind,
     );
-    await origin.reply(JSON.stringify(reminderParams));
+    await origin.reply(`
+      Reminder recorded! I will remind you on ${reminderParams.dateToRemind} at ${reminderParams.timeToRemind}
+    `);
   }
 }
