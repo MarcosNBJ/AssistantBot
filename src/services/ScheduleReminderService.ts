@@ -7,17 +7,18 @@ export default class ScheduleReminderService {
   private jobqueue!: JobQueueService;
 
   async execute(
-    content: string,
-    channelId: string,
-    dateToRemind: string,
-    timeToRemind: string,
+    reminderData: { content: string,
+      channelId: string,
+      dateToRemind: string,
+      timeToRemind: string,
+    },
   ) {
-    const targetTime = new Date(`${dateToRemind} ${timeToRemind}`);
+    const targetTime = new Date(`${reminderData.dateToRemind} ${reminderData.timeToRemind}`);
     const delay = Number(targetTime) - Number(new Date());
     const id = Math.random().toString(36).substring(7);
     await this.jobqueue.queue.add(`reminder-${id}`, {
-      content,
-      channelId,
+      content: reminderData.content,
+      channelId: reminderData.channelId,
     }, { delay });
   }
 }

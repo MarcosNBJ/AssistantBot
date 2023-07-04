@@ -66,12 +66,7 @@ export class RecordReminder extends BaseCommand {
         channelId,
         timeToRemind,
       };
-      this.scheduleReminderService.execute(
-        reminderParams.content,
-        reminderParams.channelId,
-        reminderParams.dateToRemind,
-        reminderParams.timeToRemind,
-      );
+      this.scheduleReminderService.execute(reminderParams);
       await origin.followUp(`
       Reminder recorded! I will remind you on ${reminderParams.dateToRemind} at ${reminderParams.timeToRemind}
     `);
@@ -101,12 +96,7 @@ export class RecordReminder extends BaseCommand {
 
     reminderParams.channelId = origin.channel.id;
 
-    this.scheduleReminderService.execute(
-      reminderParams.content,
-      reminderParams.channelId,
-      reminderParams.dateToRemind,
-      reminderParams.timeToRemind,
-    );
+    this.scheduleReminderService.execute(reminderParams);
     await origin.reply(`
       Reminder recorded! I will remind you on ${reminderParams.dateToRemind} at ${reminderParams.timeToRemind}
     `);
