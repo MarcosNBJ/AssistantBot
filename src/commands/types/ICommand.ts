@@ -1,5 +1,5 @@
-import { CommandInteraction, ChatInputApplicationCommandData, Message } from 'discord.js';
+import { ChatInputCommandInteraction, ChatInputApplicationCommandData, Message } from 'discord.js';
 
 export interface ICommand extends ChatInputApplicationCommandData {
-  run: (origin: CommandInteraction | Message) => void;
+  run: (origin: ChatInputCommandInteraction | Message) => void;
 }

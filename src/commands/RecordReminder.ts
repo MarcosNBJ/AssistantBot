@@ -1,5 +1,5 @@
 import {
-  CommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
+  ChatInputCommandInteraction, ApplicationCommandType, Message, ApplicationCommandOptionType,
 } from 'discord.js';
 import { Inject, Service } from 'typedi';
 import { BaseCommand } from './BaseCommand';
@@ -43,7 +43,7 @@ export class RecordReminder extends BaseCommand {
     );
   }
 
-  async run(origin: CommandInteraction | Message) {
+  async run(origin: ChatInputCommandInteraction | Message) {
     let reminderParams: {
       content: string,
       dateToRemind: string,
@@ -55,7 +55,7 @@ export class RecordReminder extends BaseCommand {
       channelId: '',
       timeToRemind: '',
     };
-    if (origin instanceof CommandInteraction) {
+    if (origin instanceof ChatInputCommandInteraction) {
       const content = origin.options.get('content')?.value as string;
       const dateToRemind = origin.options.get('date')?.value as string;
       const timeToRemind = origin.options.get('time')?.value as string;
