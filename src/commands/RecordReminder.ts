@@ -4,6 +4,7 @@ import {
 import { Inject, Service } from 'typedi';
 import { BaseCommand } from './BaseCommand';
 import ScheduleReminderService from '../services/ScheduleReminderService';
+import { askQuestion } from './utils/AskQuestion';
 
 @Service()
 export class RecordReminder extends BaseCommand {
@@ -72,15 +73,6 @@ export class RecordReminder extends BaseCommand {
     `);
       return;
     }
-
-    const askQuestion = async (message: Message, question: string) => {
-      await message.channel.send(question);
-      const filter = (response: Message) => response.author.id === message.author.id;
-      const collected = await message.channel.awaitMessages({
-        filter, max: 1, time: 15000, errors: ['time'],
-      });
-      return collected.first()?.content;
-    };
 
     const content = await askQuestion(origin, 'What is the content of the reminder?');
     if (!content) return;
