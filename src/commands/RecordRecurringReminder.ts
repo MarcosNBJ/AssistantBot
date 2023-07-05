@@ -2,6 +2,9 @@ import {
   ApplicationCommandType,
   Message, ApplicationCommandOptionType,
   ChatInputCommandInteraction,
+  ApplicationCommandOptionData,
+  ApplicationCommandSubCommandData,
+  ApplicationCommandSubGroupData,
 } from 'discord.js';
 import { Inject, Service } from 'typedi';
 import { BaseCommand } from './BaseCommand';
@@ -12,18 +15,42 @@ import weekDays from './utils/weekDays';
 export class RecordRecurringReminder extends BaseCommand {
   @Inject() protected scheduleRecurringReminderService!: ScheduleRecurringReminderService;
 
-  WEEK_DAYS = [...Array.from(Array(7).keys()).map((i) => {
-    const day = new Date(0, 0, i).toLocaleString('en-US', { weekday: 'long' });
-    return {
-      name: day,
-      value: i,
-    };
-  })];
-
   constructor() {
+    const options: Exclude<
+    ApplicationCommandOptionData,
+    ApplicationCommandSubGroupData
+    | ApplicationCommandSubCommandData>[] = [
+      {
+        name: 'content',
+        description: 'The content of the reminder',
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+
+      {
+        name: 'time_of_day',
+        description: 'The time of day to remind, in format HH:MM, 24h',
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+      {
+        name: 'day_of_month',
+        description: 'Number of the day in which we should remind you (1-31)',
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+      {
+        name: 'day_of_week',
+        description: 'The day of the week to remind',
+        type: ApplicationCommandOptionType.Integer,
+        choices: weekDays(),
+        required: true,
+      },
+    ];
+
     super(
       {
-        name: 'recurringreminder',
+        name: 'recurring_reminder',
 
         description: 'Records a recurring reminder',
 
@@ -39,71 +66,25 @@ export class RecordRecurringReminder extends BaseCommand {
                 name: 'daily',
                 description: 'The reminder will be repeated daily',
                 type: ApplicationCommandOptionType.Subcommand,
-                options: [
-                  {
-                    name: 'time_of_day',
-                    description: 'The time of day to remind, in format HH:MM, 24h',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                  {
-                    name: 'content',
-                    description: 'The content of the reminder',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                ],
+                options: options.filter(
+                  (option) => ['content', 'time_of_day'].includes(option.name),
+                ),
               },
               {
                 name: 'weekly',
                 description: 'The reminder will be repeated weekly',
                 type: ApplicationCommandOptionType.Subcommand,
-                options: [
-                  {
-                    name: 'day_of_week',
-                    description: 'The day of the week to remind',
-                    type: ApplicationCommandOptionType.Integer,
-                    choices: weekDays(),
-                    required: true,
-                  },
-                  {
-                    name: 'time_of_day',
-                    description: 'The time of day to remind, in format HH:MM, 24h',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                  {
-                    name: 'content',
-                    description: 'The content of the reminder',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                ],
+                options: options.filter(
+                  (option) => ['content', 'time_of_day', 'day_of_week'].includes(option.name),
+                ),
               },
               {
                 name: 'monthly',
                 description: 'The reminder will be repeated monthly',
                 type: ApplicationCommandOptionType.Subcommand,
-                options: [
-                  {
-                    name: 'day_of_month',
-                    description: 'Number of the day of the month to remind (1-31)',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                  {
-                    name: 'time_of_day',
-                    description: 'The time of day to remind, in format HH:MM, 24h',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                  {
-                    name: 'content',
-                    description: 'The content of the reminder',
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                  },
-                ],
+                options: options.filter(
+                  (option) => ['content', 'time_of_day', 'day_of_month'].includes(option.name),
+                ),
               },
             ],
           },
@@ -114,57 +95,36 @@ export class RecordRecurringReminder extends BaseCommand {
 
   async run(origin: ChatInputCommandInteraction | Message) {
     if (origin instanceof ChatInputCommandInteraction) {
+      const timeOfDay = origin.options.getString('time_of_day', true);
+      const [hour, minute] = timeOfDay.split(':');
+      const content = origin.options.getString('content', true);
+      const { channelId } = origin;
+      let cronExp = '';
+      let replyMessageDetail = '';
+
       switch (origin.options.getSubcommand()) {
         case 'daily': {
-          const timeOfDay = origin.options.getString('time_of_day', true);
-          const [hour, minute] = timeOfDay.split(':');
-          const cronExp = `0 ${+minute || 0} ${+hour} * * *`;
-          const content = origin.options.getString('content', true);
-          await this.scheduleRecurringReminderService.execute(
-            {
-              channelId: origin.channelId,
-              content,
-              pattern: cronExp,
-            },
-          );
-          origin.followUp(`Recorded! I will remind you daily at ${timeOfDay}`);
+          cronExp = `0 ${+minute || 0} ${+hour} * * *`;
+          replyMessageDetail = `every day at ${timeOfDay}`;
           break;
         }
         case 'weekly': {
           const dayOfWeek = origin.options.getInteger('day_of_week', true);
-          const timeOfDay = origin.options.getString('time_of_day', true);
-          const [hour, minute] = timeOfDay.split(':');
-          const cronExp = `0 ${+minute || 0} ${+hour} * * ${dayOfWeek}`;
-          const content = origin.options.getString('content', true);
-          await this.scheduleRecurringReminderService.execute(
-            {
-              channelId: origin.channelId,
-              content,
-              pattern: cronExp,
-            },
-          );
-          origin.followUp(`Recorded! I will remind you every ${dayOfWeek} at ${timeOfDay}`);
+          cronExp = `0 ${+minute || 0} ${+hour} * * ${dayOfWeek}`;
+          replyMessageDetail = `every ${weekDays().find((day) => day.value === dayOfWeek)?.name} at ${timeOfDay}`;
           break;
         }
         case 'monthly': {
           const dayOfMonth = origin.options.getString('day_of_month', true);
-          const timeOfDay = origin.options.getString('time_of_day', true);
-          const [hour, minute] = timeOfDay.split(':');
-          const cronExp = `0 ${+minute || 0} ${+hour} ${dayOfMonth} * *`;
-          const content = origin.options.getString('content', true);
-          await this.scheduleRecurringReminderService.execute(
-            {
-              channelId: origin.channelId,
-              content,
-              pattern: cronExp,
-            },
-          );
-          origin.followUp(`Recorded! I will remind you every ${dayOfMonth} at ${timeOfDay}`);
+          cronExp = `0 ${+minute || 0} ${+hour} ${dayOfMonth} * *`;
+          replyMessageDetail = `every day ${dayOfMonth} of each month, at ${timeOfDay}`;
           break;
         }
         default:
           break;
       }
+      origin.reply(`Recorded! I will remind you ${replyMessageDetail}`);
+      await this.scheduleRecurringReminderService.execute({ channelId, content, cronExp });
       return;
     }
     const askQuestion = async (message: Message, question: string) => {

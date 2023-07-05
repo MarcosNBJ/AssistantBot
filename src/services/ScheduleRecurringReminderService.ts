@@ -10,7 +10,7 @@ export default class ScheduleRecurringReminderService {
     reminderData: {
       content: string,
       channelId: string,
-      pattern: string,
+      cronExp: string,
     },
   ) {
     const id = Math.random().toString(36).substring(7);
@@ -19,7 +19,7 @@ export default class ScheduleRecurringReminderService {
       channelId: reminderData.channelId,
     }, {
       repeat: {
-        pattern: reminderData.pattern,
+        pattern: reminderData.cronExp,
       },
     });
   }
