@@ -12,7 +12,7 @@ export class RecordReminder extends BaseCommand {
   constructor() {
     super(
       {
-        name: 'recordreminder',
+        name: 'reminder',
 
         description: 'Records a reminder',
 
