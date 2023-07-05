@@ -94,36 +94,38 @@ export class RecordRecurringReminder extends BaseCommand {
   }
 
   async run(origin: ChatInputCommandInteraction | Message) {
+    const { channelId } = origin;
+
     if (origin instanceof ChatInputCommandInteraction) {
       const timeOfDay = origin.options.getString('time_of_day', true);
       const [hour, minute] = timeOfDay.split(':');
       const content = origin.options.getString('content', true);
-      const { channelId } = origin;
+      const dayOfWeek = origin.options.getInteger('day_of_week') || 0;
+      const dayOfMonth = origin.options.getString('day_of_month') || '0';
       let cronExp = '';
-      let replyMessageDetail = '';
 
       switch (origin.options.getSubcommand()) {
         case 'daily': {
           cronExp = `0 ${+minute || 0} ${+hour} * * *`;
-          replyMessageDetail = `every day at ${timeOfDay}`;
           break;
         }
         case 'weekly': {
-          const dayOfWeek = origin.options.getInteger('day_of_week', true);
           cronExp = `0 ${+minute || 0} ${+hour} * * ${dayOfWeek}`;
-          replyMessageDetail = `every ${weekDays().find((day) => day.value === dayOfWeek)?.name} at ${timeOfDay}`;
           break;
         }
         case 'monthly': {
-          const dayOfMonth = origin.options.getString('day_of_month', true);
           cronExp = `0 ${+minute || 0} ${+hour} ${dayOfMonth} * *`;
-          replyMessageDetail = `every day ${dayOfMonth} of each month, at ${timeOfDay}`;
           break;
         }
         default:
           break;
       }
-      origin.reply(`Recorded! I will remind you ${replyMessageDetail}`);
+      const replyMessageDetail = this.replyMessageDetail(origin.options.getSubcommand(), {
+        timeOfDay,
+        dayOfMonth,
+        dayOfWeek,
+      });
+      origin.followUp(`Recorded! I will remind you ${replyMessageDetail}`);
       await this.scheduleRecurringReminderService.execute({ channelId, content, cronExp });
       return;
     }
@@ -140,55 +142,59 @@ export class RecordRecurringReminder extends BaseCommand {
     const content = await askQuestion(origin, 'What is the content of the reminder?');
     const timeOfDay = await askQuestion(origin, 'What time of day? (HH:MM, 24h)') || '00:00';
     const [hour, minute] = timeOfDay.split(':');
+    let dayOfWeek: number | undefined;
+    let dayOfMonth: string | undefined;
+    let cronExp = '';
 
-    if (!content) {
+    if (!content || !timeOfDay || !recurrence) {
       origin.channel.send('Invalid content');
       return;
     }
     switch (recurrence) {
       case 'daily': {
-        const cronExp = `0 ${+minute || 0} ${+hour} * * *`;
-        await this.scheduleRecurringReminderService.execute(
-          {
-            channelId: origin.channelId,
-            content,
-            pattern: cronExp,
-          },
-        );
-        origin.reply(`Recorded! I will remind you daily at ${timeOfDay}`);
+        cronExp = `0 ${+minute || 0} ${+hour} * * *`;
         break;
       }
       case 'weekly': {
-        const dayOfWeek = await askQuestion(origin, 'In what day of the week would you like to be reminded? (Sunday, Monday, etc.)');
-        const weekDayNumber = weekDays().find(
-          (day) => day.name === dayOfWeek?.toLocaleLowerCase(),
+        const weekDayName = await askQuestion(origin, 'In what day of the week would you like to be reminded? (Sunday, Monday, etc.)');
+        dayOfWeek = weekDays().find(
+          (day) => day.name === weekDayName?.toLocaleLowerCase(),
         )?.value;
-        const cronExp = `0 ${+minute || 0} ${+hour} * * ${weekDayNumber}`;
-        await this.scheduleRecurringReminderService.execute(
-          {
-            channelId: origin.channelId,
-            content,
-            pattern: cronExp,
-          },
-        );
-        origin.reply(`Recorded! I will remind you every ${dayOfWeek} at ${timeOfDay}`);
+        cronExp = `0 ${+minute || 0} ${+hour} * * ${dayOfWeek}`;
         break;
       }
       case 'monthly': {
-        const dayOfMonth = await askQuestion(origin, 'In what day of the month would you like to be reminded? (1-31)');
-        const cronExp = `0 ${+minute || 0} ${+hour} ${dayOfMonth} * *`;
-        await this.scheduleRecurringReminderService.execute(
-          {
-            channelId: origin.channelId,
-            content,
-            pattern: cronExp,
-          },
-        );
-        origin.reply(`Recorded! I will remind you every ${dayOfMonth} at ${timeOfDay}`);
+        dayOfMonth = await askQuestion(origin, 'In what day of the month would you like to be reminded? (1-31)');
+        cronExp = `0 ${+minute || 0} ${+hour} ${dayOfMonth} * *`;
         break;
       }
       default:
         break;
     }
+
+    const replyMessageDetail = this.replyMessageDetail(recurrence, {
+      timeOfDay,
+      dayOfMonth,
+      dayOfWeek,
+    });
+    origin.reply(`Recorded! I will remind you ${replyMessageDetail}`);
+    await this.scheduleRecurringReminderService.execute({ channelId, content, cronExp });
+  }
+
+  private replyMessageDetail(
+    recurrence: string,
+    detail: {
+      timeOfDay: string,
+      dayOfWeek?: number,
+      dayOfMonth?: string,
+    },
+  ) {
+    if (recurrence === 'daily') {
+      return `every day at ${detail.timeOfDay}`;
+    }
+    if (recurrence === 'weekly') {
+      return `every ${weekDays().find((day) => day.value === detail.dayOfWeek)?.name} at ${detail.timeOfDay}`;
+    }
+    return `every day ${detail.dayOfMonth} of each month, at ${detail.timeOfDay}`;
   }
 }
