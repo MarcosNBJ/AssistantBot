@@ -28,7 +28,10 @@ client.on('interactionCreate', async (interaction) => {
 
   await interaction.deferReply();
 
-  command.run(interaction);
+  await command.run(interaction).catch((error) => {
+    console.log(`Error running command ${command.name} - ${error}`);
+    interaction.followUp(error.message);
+  });
 });
 
 client.on('messageCreate', async (message) => {
@@ -46,7 +49,10 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  command.run(message);
+  await command.run(message).catch((error) => {
+    console.log(`Error running command ${command.name} - ${JSON.stringify(error)}`);
+    message.reply(error.message);
+  });
 });
 
 client.login(config.TOKEN);
