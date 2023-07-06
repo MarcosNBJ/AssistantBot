@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import ScheduleRecurringReminderService from '../../services/ScheduleRecurringReminderService';
 import replyMessageDetail from './replyMessageDetail';
 
-export default async function slashExecute(
+export default async function slashCommand(
   origin: ChatInputCommandInteraction,
   schedulerService: ScheduleRecurringReminderService,
 ) {
@@ -12,9 +12,10 @@ export default async function slashExecute(
   const content = origin.options.getString('content', true);
   const dayOfWeek = origin.options.getInteger('day_of_week') || 0;
   const dayOfMonth = origin.options.getString('day_of_month') || '0';
+  const recurrence = origin.options.getSubcommand();
   let cronExp = '';
 
-  switch (origin.options.getSubcommand()) {
+  switch (recurrence) {
     case 'daily': {
       cronExp = `0 ${+minute || 0} ${+hour} * * *`;
       break;
@@ -30,7 +31,7 @@ export default async function slashExecute(
     default:
       break;
   }
-  const replyMessage = replyMessageDetail(origin.options.getSubcommand(), {
+  const replyMessage = replyMessageDetail(recurrence, {
     timeOfDay,
     dayOfMonth,
     dayOfWeek,

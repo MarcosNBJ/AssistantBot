@@ -10,7 +10,7 @@ import { Inject, Service } from 'typedi';
 import { BaseCommand } from '../BaseCommand';
 import ScheduleRecurringReminderService from '../../services/ScheduleRecurringReminderService';
 import weekDays from '../utils/WeekDays';
-import slashExecute from './slashCommand';
+import slashCommand from './slashCommand';
 import chatCommand from './chatCommand';
 
 @Service()
@@ -97,7 +97,7 @@ export class RecordRecurringReminder extends BaseCommand {
 
   async run(origin: ChatInputCommandInteraction | Message) {
     if (origin instanceof ChatInputCommandInteraction) {
-      slashExecute(origin, this.scheduleRecurringReminderService);
+      slashCommand(origin, this.scheduleRecurringReminderService);
       return;
     }
 

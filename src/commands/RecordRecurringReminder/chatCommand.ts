@@ -17,10 +17,6 @@ export default async function chatCommand(
   let dayOfMonth: string | undefined;
   let cronExp = '';
 
-  if (!content || !timeOfDay || !recurrence) {
-    origin.channel.send('Invalid content');
-    return;
-  }
   switch (recurrence) {
     case 'daily': {
       cronExp = `0 ${+minute || 0} ${+hour} * * *`;
