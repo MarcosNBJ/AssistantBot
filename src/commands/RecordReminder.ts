@@ -50,16 +50,11 @@ export class RecordReminder extends BaseCommand {
       dateToRemind: string,
       channelId: string,
       timeToRemind: string,
-    } = {
-      content: '',
-      dateToRemind: '',
-      channelId: '',
-      timeToRemind: '',
     };
     if (origin instanceof ChatInputCommandInteraction) {
-      const content = origin.options.get('content')?.value as string;
-      const dateToRemind = origin.options.get('date')?.value as string;
-      const timeToRemind = origin.options.get('time')?.value as string;
+      const content = origin.options.getString('content', true);
+      const dateToRemind = origin.options.getString('date', true);
+      const timeToRemind = origin.options.getString('time', true);
       const { channelId } = origin;
       reminderParams = {
         content,
@@ -74,19 +69,12 @@ export class RecordReminder extends BaseCommand {
       return;
     }
 
-    const content = await askQuestion(origin, 'What is the content of the reminder?');
-    if (!content) return;
-    reminderParams.content = content;
-
-    const dateToRemind = await askQuestion(origin, 'What is the date to remind?, in format DD/MM/YYYY');
-    if (!dateToRemind) return;
-    reminderParams.dateToRemind = dateToRemind;
-
-    const timeToRemind = await askQuestion(origin, 'What is the time to remind?, in format HH:MM, 24h');
-    if (!timeToRemind) return;
-    reminderParams.timeToRemind = timeToRemind;
-
-    reminderParams.channelId = origin.channel.id;
+    reminderParams = {
+      content: await askQuestion(origin, 'What is the content of the reminder?'),
+      dateToRemind: await askQuestion(origin, 'What is the date to remind?, in format DD/MM/YYYY'),
+      timeToRemind: await askQuestion(origin, 'What is the time to remind?, in format HH:MM, 24h'),
+      channelId: origin.channel.id,
+    };
 
     this.scheduleReminderService.execute(reminderParams);
     await origin.reply(`
