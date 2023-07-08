@@ -13,8 +13,8 @@ export default class ScheduleRecurringReminderService {
       cronExp: string,
     },
   ) {
-    const id = Math.random().toString(36).substring(7);
-    await this.jobqueue.queue.add(`reminder-${id}`, {
+    const id = `reminder-${Math.random().toString(36).substring(7)}`;
+    await this.jobqueue.queue.add(id, {
       content: reminderData.content,
       channelId: reminderData.channelId,
     }, {
