@@ -8,12 +8,15 @@ const ReminderSchema = new Schema({
     type: String,
     required: true,
   },
-  channelId: {
-    type: Number,
-    required: true,
-  },
   dateToRemind: {
     type: Date,
+    required: true,
+  },
+  jobId: {
+    type: String,
+  },
+  type: {
+    type: String,
     required: true,
   },
 });

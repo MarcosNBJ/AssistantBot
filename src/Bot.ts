@@ -5,6 +5,7 @@ import {
 import mongoose from 'mongoose';
 import config from './config';
 import { Commands } from './commands';
+import { Buttons } from './buttons';
 
 const client = new Client({
   intents: config.BOT_INTENTS,
@@ -19,7 +20,17 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand()) {
+    if (interaction.isButton()) {
+      const buttonId = interaction.customId.split('#')[0];
+      const button = Buttons.find((b) => b.id === buttonId);
+      await button?.execute(interaction).catch((error) => {
+        console.log(`Error running button ${button.id} - ${error}`);
+        interaction.followUp(error.message);
+      });
+    }
+    return;
+  }
   const command = Commands.find((c) => c.name === interaction.commandName);
   if (!command) {
     interaction.followUp({ content: 'An error has occurred' });
