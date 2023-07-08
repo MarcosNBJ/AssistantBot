@@ -11,7 +11,7 @@ interface CommandData {
   name: string;
   type: ApplicationCommandType.ChatInput;
   description: string;
-  options: ApplicationCommandOptionData[];
+  options?: ApplicationCommandOptionData[];
 }
 
 @Service()
@@ -33,7 +33,7 @@ export abstract class BaseCommand implements ICommand {
     this.name = name;
     this.type = type;
     this.description = description;
-    this.options = options;
+    this.options = options || [];
   }
 
   abstract run(origin: CommandInteraction | Message): Promise<void>;
