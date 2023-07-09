@@ -13,7 +13,8 @@ export default class ScheduleReminderService {
       timeToRemind: string,
     },
   ) {
-    const targetTime = new Date(`${reminderData.dateToRemind} ${reminderData.timeToRemind}`);
+    const [day, month, year] = reminderData.dateToRemind.split('/');
+    const targetTime = new Date(`${month}/${day}/${year} ${reminderData.timeToRemind}`);
     const delay = Number(targetTime) - Number(new Date());
     const id = Math.random().toString(36).substring(7);
     await this.jobqueue.queue.add(`reminder-${id}`, {
