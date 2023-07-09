@@ -48,7 +48,9 @@ export class ListReminders extends BaseCommand {
       type: 1,
       components: [deleteButton],
     }];
-    await origin.followUp({ content, components });
+    await origin.followUp({ content, components }).then(
+      (msg) => setTimeout(() => msg.delete(), 10000),
+    );
     return true;
   }
 
