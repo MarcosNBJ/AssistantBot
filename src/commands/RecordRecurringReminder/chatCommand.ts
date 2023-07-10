@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { askQuestion } from '../utils/AskQuestion';
-import weekDays from '../utils/WeekDays';
+import WeekDays from '../utils/WeekDays';
 import replyMessageDetail from './replyMessageDetail';
 import ScheduleRecurringReminderService from '../../services/ScheduleRecurringReminderService';
 
@@ -24,7 +24,7 @@ export default async function chatCommand(
     }
     case 'weekly': {
       const weekDayName = await askQuestion(origin, 'In what day of the week would you like to be reminded? (Sunday, Monday, etc.)');
-      dayOfWeek = weekDays().find(
+      dayOfWeek = WeekDays().find(
         (day) => day.name === weekDayName?.toLocaleLowerCase(),
       )?.value;
       cronExp = `0 ${+minute || 0} ${+hour} * * ${dayOfWeek}`;

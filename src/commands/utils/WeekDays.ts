@@ -1,4 +1,4 @@
-export default function weekDays() {
+export default function WeekDays() {
   return [
     ...Array.from(Array(7).keys()).map((i) => {
       const day = new Date(0, 0, i).toLocaleString('en-US', { weekday: 'long' });

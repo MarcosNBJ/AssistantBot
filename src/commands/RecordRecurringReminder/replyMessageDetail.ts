@@ -1,4 +1,4 @@
-import weekDays from '../utils/WeekDays';
+import WeekDays from '../utils/WeekDays';
 
 export default function replyMessageDetail(
   recurrence: string,
@@ -12,7 +12,7 @@ export default function replyMessageDetail(
     return `every day at ${detail.timeOfDay}`;
   }
   if (recurrence === 'weekly') {
-    return `every ${weekDays().find((day) => day.value === detail.dayOfWeek)?.name} at ${detail.timeOfDay}`;
+    return `every ${WeekDays().find((day) => day.value === detail.dayOfWeek)?.name} at ${detail.timeOfDay}`;
   }
   return `every day ${detail.dayOfMonth} of each month, at ${detail.timeOfDay}`;
 }
