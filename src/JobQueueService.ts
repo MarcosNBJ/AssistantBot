@@ -15,6 +15,6 @@ export class JobQueueService {
   }
 
   async add(name: string, data: any, options?: any) {
-    await this.queue.add(name, data, options);
+    await this.queue.add(name, data, { ...options, removeOnComplete: true });
   }
 }

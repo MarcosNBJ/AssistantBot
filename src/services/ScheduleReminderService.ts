@@ -17,7 +17,7 @@ export default class ScheduleReminderService {
     const targetTime = new Date(`${month}/${day}/${year} ${reminderData.timeToRemind}`);
     const delay = Number(targetTime) - Number(new Date());
     const id = Math.random().toString(36).substring(7);
-    await this.jobqueue.queue.add(`reminder-${id}`, {
+    await this.jobqueue.add(`reminder-${id}`, {
       content: reminderData.content,
       channelId: reminderData.channelId,
     }, { delay });
