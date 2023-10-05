@@ -56,7 +56,10 @@ export class ListReminders extends BaseCommand {
 
   public async run(origin: ChatInputCommandInteraction | Message): Promise<void> {
     if (origin instanceof ChatInputCommandInteraction) {
-      const oneTimeJobs = await this.jobqueue.queue.getJobs();
+      let oneTimeJobs = await this.jobqueue.queue.getJobs();
+
+      oneTimeJobs = oneTimeJobs.filter((job) => !job?.repeatJobKey);
+
       const recurringJobs = await this.jobqueue.queue.getRepeatableJobs();
       const jobs = [...oneTimeJobs, ...recurringJobs];
       const uniqueJobs = jobs.filter(
