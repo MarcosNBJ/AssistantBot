@@ -39,10 +39,11 @@ export class ListReminders extends BaseCommand {
     const repeatJobKey = jobData?.repeatJobKey;
     const content = jobData?.data?.content;
     const jobType = repeatJobKey ? 'recurring' : 'one-time';
+    const deleteId = jobType === 'recurring' ? repeatJobKey : id;
 
     const deleteButton = {
       ...DELETE_BUTTON,
-      custom_id: `delete_reminder#${jobType}#${repeatJobKey || id}`,
+      custom_id: `delete_reminder#${jobType}#${repeatJobKey || deleteId}`,
     };
     const components = [{
       type: 1,
@@ -56,16 +57,14 @@ export class ListReminders extends BaseCommand {
 
   public async run(origin: ChatInputCommandInteraction | Message): Promise<void> {
     if (origin instanceof ChatInputCommandInteraction) {
-      let oneTimeJobs = await this.jobqueue.queue.getJobs();
-
-      oneTimeJobs = oneTimeJobs.filter((job) => !job?.repeatJobKey);
-
-      const recurringJobs = await this.jobqueue.queue.getRepeatableJobs();
-      const jobs = [...oneTimeJobs, ...recurringJobs];
-      const uniqueJobs = jobs.filter(
-        (job, index, self) => self.findIndex((j) => j.id === job.id) === index,
+      const allJobs = await this.jobqueue.queue.getJobs();
+      const oneTimeJobs = allJobs.filter((job) => !job?.repeatJobKey);
+      const recurringJobs = allJobs.filter((job) => !!job?.repeatJobKey);
+      const uniqueRecurringJobs = recurringJobs.filter(
+        (job, index, self) => self.findIndex((j) => j.repeatJobKey === job.repeatJobKey) === index,
       );
-      const messages = await Promise.all(uniqueJobs.map((job) => this.handleJob(origin, job)));
+      const jobs = [...oneTimeJobs, ...uniqueRecurringJobs];
+      const messages = await Promise.all(jobs.map((job) => this.handleJob(origin, job)));
 
       if (!messages.find((m) => m)) await origin.followUp('No reminders found');
     }
